@@ -1,12 +1,15 @@
 package com.devsuperior.dsmeta.services;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 
 import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.dto.SaleDTO;
@@ -23,8 +26,13 @@ public class SaleService {
 	private ModelMapper mapper;
 	
 	@Transactional
-	public List<SaleDTO> findSales() {
-		List<Sale> sales = repository.findAll();
-		return sales.stream().map(x -> mapper.map(x, SaleDTO.class)).collect(Collectors.toList());
+	public Page<SaleDTO> findSales(String minDate, String maxDate, Pageable pageable) {
+		LocalDate today = LocalDate.ofInstant(Instant.now(), ZoneId.systemDefault());
+		
+		LocalDate min = minDate.equals("") ? today.minusMonths(1) : LocalDate.parse(minDate);
+		LocalDate max = maxDate.equals("") ? today : LocalDate.parse(maxDate);
+		
+		Page<Sale> sales = repository.findSales(min, max, pageable);
+		return sales.map(x -> mapper.map(x, SaleDTO.class));
 	}
 }
