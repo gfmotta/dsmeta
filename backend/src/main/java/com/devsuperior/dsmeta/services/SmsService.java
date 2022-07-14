@@ -27,22 +27,24 @@ public class SmsService {
 
 	@Value("${twilio.phone.to}")
 	private String twilioPhoneTo;
-	
+
 	@Autowired
 	private SaleRepository saleRepository;
 
 	public void sendSms(Long id) {
-		Sale sale = saleRepository.findById(id).orElseThrow(() -> new DatabaseException("Não foi possível realizar a operação. Registro não encontrado!"));
-		
+		Sale sale = saleRepository.findById(id).orElseThrow(
+				() -> new DatabaseException("Não foi possível realizar a operação. Registro não encontrado!"));
+
 		Twilio.init(twilioSid, twilioKey);
 
 		PhoneNumber to = new PhoneNumber(twilioPhoneTo);
 		PhoneNumber from = new PhoneNumber(twilioPhoneFrom);
 
-		Message message = Message.creator(to, from, String.format(
-						"O vendedor %s foi destaque em %s com um total de R$%.2f em vendas! ", 
-						sale.getSellerName(), sale.getDate().format(DateTimeFormatter.ofPattern("MM/yyyy")), sale.getAmount()
-						)).create();
+		Message message = Message.creator(to, from,
+				String.format("O vendedor %s foi destaque em %s com um total de R$ %.2f em vendas! ",
+						sale.getSellerName(), sale.getDate().format(DateTimeFormatter.ofPattern("MM/yyyy")),
+						sale.getAmount()))
+				.create();
 
 		System.out.println(message.getSid());
 	}
