@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.devsuperior.dsmeta.entities.Sale;
 import com.devsuperior.dsmeta.repositories.SaleRepository;
+import com.devsuperior.dsmeta.services.exceptions.DatabaseException;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
@@ -31,7 +32,7 @@ public class SmsService {
 	private SaleRepository saleRepository;
 
 	public void sendSms(Long id) {
-		Sale sale = saleRepository.findById(id).get();
+		Sale sale = saleRepository.findById(id).orElseThrow(() -> new DatabaseException("Não foi possível realizar a operação. Registro não encontrado!"));
 		
 		Twilio.init(twilioSid, twilioKey);
 
